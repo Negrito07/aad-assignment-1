@@ -136,7 +136,7 @@ static void alarm_signal_handler(int dummy)
 #endif
 #ifdef MD5_CPU_AVX2
 # include "deti_coins_cpu_avx2_search.h"
-//# include "deti_coins_openmp_search.h"
+# include "deti_coins_openmp_search.h"
 #endif
 //#ifdef MD5_CPU_NEON
 //# include "deti_coins_cpu_neon_search.h"
@@ -211,11 +211,13 @@ int main(int argc,char **argv)
         fflush(stdout);
         deti_coins_cpu_avx2_search(n_random_words);
         break;
-      // case '5': 
-      //   printf("searching for %u seconds using deti_coins_openmp_search()\n",seconds);
-      //   fflush(stdout);
-      //   deti_coins_openmp_search(n_random_words);
-      //   break;  
+#endif
+#ifdef DETI_COINS_OPENMP_SEARCH
+      case '5': 
+        printf("searching for %u seconds using deti_coins_openmp_search()\n",seconds);
+        fflush(stdout);
+        deti_coins_openmp_search(n_random_words);
+        break;  
 #endif
 #ifdef DETI_COINS_CPU_NEON_SEARCH
       case '3':

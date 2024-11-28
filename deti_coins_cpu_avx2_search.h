@@ -55,10 +55,9 @@ static void deti_coins_cpu_avx2_search(u32_t n_random_words)
             n = deti_coin_power(hash[lane]);
 
             if (n >= 32u) {
-                print_hash(hash[lane]);
-                printf("power: %d\n",n);
-                print_deti_coin(coin[lane]);
-
+                //print_hash(hash[lane]);
+               // printf("power: %d\n",n);
+               // print_deti_coin(coin[lane]);
                 save_deti_coin(coin[lane]);
                 n_coins++;
             }

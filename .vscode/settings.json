@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "deti_coins_openmp_search.h": "c",
+        "md5_cpu_avx2.h": "c"
+    }
+}
