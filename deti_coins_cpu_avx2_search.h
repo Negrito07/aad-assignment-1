@@ -2,7 +2,7 @@
 #define DETI_COINS_CPU_AVX2_SEARCH
 
 #include "md5_cpu_avx2.h"
-
+        
 static void deti_coins_cpu_avx2_search(u32_t n_random_words)
 {
     u32_t n, idx, coin[8][13], hash[8][4];
@@ -18,8 +18,21 @@ static void deti_coins_cpu_avx2_search(u32_t n_random_words)
         bytes[lane][4] = ' '; bytes[lane][5] = 'c'; bytes[lane][6] = 'o'; bytes[lane][7] = 'i';
         bytes[lane][8] = 'n'; bytes[lane][9] = ' ';
 
-        for (idx = 10u; idx < 52u - 1u; idx++) 
-            bytes[lane][idx] = ' ';
+        // for (idx = 10u; idx < 52u - 1u; idx++) 
+        //     bytes[lane][idx] = ' ';
+
+        // Gerar um número aleatório de palavras para modificar
+        int random_words_count = n_random_words;  // Número de palavras aleatórias baseado no argumento
+
+        // Limite de aleatoriedade para as 13 palavras possíveis
+        for (idx = 10u; idx < 52u - 1u; idx++) {
+            // Aleatoriedade: Se for uma posição que deve ser aleatória
+            if (rand() % 13 < random_words_count) {
+                bytes[lane][idx] = (u08_t)(rand() % 94 + 32);  // Gerar caractere aleatório entre 32 (espço) e 126 (~)
+            } else {
+                bytes[lane][idx] = ' ';  // Se não, preenche com espaço
+            }
+        }
 
         bytes[lane][51] = '\n';
     }
