@@ -8,31 +8,6 @@
 
 #include "md5_cpu_avx.h"
 
-void print_deti_coin(u32_t coin[13])
-{
-    u08_t *bytes = (u08_t *)coin;
-
-    printf("DETI Coin Found: \"");
-    for (int i = 0; i < 52; i++)
-    {
-        if (bytes[i] >= 32 && bytes[i] <= 126) // Imprime apenas caracteres legíveis
-            printf("%c", bytes[i]);
-        else
-            printf("\\x%02X", bytes[i]); // Caracteres não legíveis como hexadecimal
-    }
-    printf("\"\n");
-}
-
-
-void print_hash(const u32_t hash[4])
-{
-    printf("MD5 Hash: ");
-    for (int i = 0; i < 4; i++)
-        printf("%08X", hash[i]); // Imprime cada parte do hash em hexadecimal
-    printf("\n");
-}
-
-
 static void deti_coins_cpu_avx_search(u32_t n_random_words)
 {
     u32_t n, idx, coin[4][13], hash[4][4];
@@ -41,76 +16,76 @@ static void deti_coins_cpu_avx_search(u32_t n_random_words)
     u32_t interleaved_data[4 * 13] __attribute__((aligned(16)));
     u32_t interleaved_hash[4 * 4] __attribute__((aligned(16)));
 
+
+    int random_positions[9] = {0}; //Apenas 9 posições possíveis(Words)
+    int random_count = 0;
+
+    //Quais posições serão aleatórias tendo em conta n_random_words
+    while (random_count < n_random_words) {
+        int random_pos = rand() % 9; 
+        if (!random_positions[random_pos]) {
+            random_positions[random_pos] = 1; 
+            random_count++;
+        }
+    }
+
     // Inicializa as moedas para os quatro caminhos de busca paralelos
     for (int lane = 0; lane < 4; lane++) {
         bytes[lane] = (u08_t *)&coin[lane][0];
         bytes[lane][0] = 'D'; bytes[lane][1] = 'E'; bytes[lane][2] = 'T'; bytes[lane][3] = 'I';
         bytes[lane][4] = ' '; bytes[lane][5] = 'c'; bytes[lane][6] = 'o'; bytes[lane][7] = 'i';
-        bytes[lane][8] = 'n'; bytes[lane][9] = ' ';
+        bytes[lane][8] = 'n'; bytes[lane][9] = ' '; bytes[lane][10] = ' '; bytes[lane][11] = ' ';
 
-        // for (idx = 10u; idx < 52u - 1u; idx++) 
-        //     bytes[lane][idx] = ' ';
-
-
-        // Gerar um número aleatório de palavras para modificar
-        int random_words_count = n_random_words;  // Número de palavras aleatórias baseado no argumento
-
-        // Limite de aleatoriedade para as 13 palavras possíveis
-        for (idx = 10u; idx < 52u - 1u; idx++) {
-            // Aleatoriedade: Se for uma posição que deve ser aleatória
-            if (rand() % 13 < random_words_count) {
-                bytes[lane][idx] = (u08_t)(rand() % 94 + 32);  // Gerar caractere aleatório entre 32 (espço) e 126 (~)
+        for (int word_idx = 0; word_idx < 9; word_idx++) {
+            int idx = 12 + word_idx * 4; // Calcula o índice inicial do byte correspondente
+            if (random_positions[word_idx]) {
+                //Posição é aleatória
+                for (int byte = 0; byte < 4; byte++) {
+                    bytes[lane][idx + byte] = (u08_t)(rand() % 94 + 32);
+                }
             } else {
-                bytes[lane][idx] = ' ';  // Se não, preenche com espaço
+                //Posição não é aleatória
+                for (int byte = 0; byte < 4; byte++) {
+                    bytes[lane][idx + byte] = ' '; 
+                }
             }
         }
 
-        bytes[lane][51] = '\n'; // Terminação obrigatória
+        bytes[lane][48] = ' ';  
+        bytes[lane][49] = ' ';  
+        bytes[lane][50] = ' ';  
+        bytes[lane][51] = '\n';
     }
 
-    // Inicia o loop de tentativa
     for (n_attempts = n_coins = 0ul; stop_request == 0; n_attempts += 4) {
-        // Prepara os dados intercalados para entrada do AVX
         for (int lane = 0; lane < 4; lane++)
             for (idx = 0; idx < 13; idx++)
                 interleaved_data[4 * idx + lane] = coin[lane][idx];
 
-        // Calcula os hashes MD5 usando AVX
+        //Calcula os hashes MD5 usando AVX
         md5_cpu_avx((v4si *)interleaved_data, (v4si *)interleaved_hash);
 
-        // Verifica os resultados e salva moedas válidas
+        //Verifica os resultados e salva moedas válidas
         for (int lane = 0; lane < 4; lane++) {
-            // Transfere os dados de volta para o formato padrão
             for (idx = 0; idx < 4; idx++)
                 hash[lane][idx] = interleaved_hash[4 * idx + lane];
-
-            // Reverte os bytes do hash
             hash_byte_reverse(hash[lane]);
 
-            // Determina o "poder" da moeda
             n = deti_coin_power(hash[lane]);
-
-            // if (lane == 0){
-            //   print_hash(hash[lane]);
-            // }
-
-            if (n >= 32u) { // Moeda válida
-                print_hash(hash[lane]);
-                //print_deti_coin(coin[lane]);
-
-                
+            
+            //Moeda válida
+            if (n >= 32u) { 
+                //print_hash(hash[lane]);
+                //print_deti_coin(coin[lane]);                
                 save_deti_coin(coin[lane]);
                 n_coins++;
             }
 
-            // Incrementa os bytes para próxima tentativa
+            //Incrementa os bytes para próxima tentativa
             for (idx = 10u; idx < 52u - 1u && bytes[lane][idx] == (u08_t)126; idx++)
                 bytes[lane][idx] = ' ';
             if (idx < 52u - 1u)
-                bytes[lane][idx]++;
-
-
-            
+                bytes[lane][idx]++;            
         }
     }
 

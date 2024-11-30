@@ -125,4 +125,30 @@ static u32_t parse_time_duration(const char *time_duration)
     }
 }
 
+
+static void print_deti_coin(u32_t coin[13])
+{
+    u08_t *bytes = (u08_t *)coin;
+
+    printf("DETI Coin Found: \"");
+    for (int i = 0; i < 52; i++)
+    {
+        if (bytes[i] >= 32 && bytes[i] <= 126) // Imprime apenas caracteres legíveis
+            printf("%c", bytes[i]);
+        else
+            printf("\\x%02X", bytes[i]); // Caracteres não legíveis como hexadecimal
+    }
+    printf("\"\n");
+}
+
+
+static void print_hash(const u32_t hash[4])
+{
+    printf("MD5 Hash: ");
+    for (int i = 0; i < 4; i++)
+        printf("%08X", hash[i]); // Imprime cada parte do hash em hexadecimal
+    printf("\n");
+}
+
+
 #endif
