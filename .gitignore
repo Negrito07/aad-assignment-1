@@ -10,3 +10,6 @@
 # Ignore executables
 *.out
 *.cubin
+
+# Ignore vscode
+.vscode
