@@ -8,6 +8,11 @@
 CUDA_DIR = /usr/local/cuda
 
 #
+# CUDA ld directory --- /usr/local/cuda/lib64 or /usr/lib/wsl/lib (WSL)
+#
+CUDA_LD_DIR ?= $(CUDA_DIR)/lib64
+
+#
 # OpenCL installation directory (for a NVidia graphics card, sama as CUDA)
 #
 OPENCL_DIR = $(CUDA_DIR)
@@ -19,7 +24,7 @@ OPENCL_DIR = $(CUDA_DIR)
 #   RTX A6000 Ada --------- sm_86
 #   RTX 4070 -------------- sm_89
 #
-CUDA_ARCH = sm_75
+CUDA_ARCH = sm_89
 
 
 #
@@ -60,7 +65,7 @@ deti_coins_apple:	$(SRC) $(H_FILES)
 # compile for Intel/AMD processors with CUDA
 #
 deti_coins_intel_cuda:	$(SRC) $(H_FILES) $(C_FILES) md5_cuda_kernel.cubin
-	cc -Wall -O2 -mavx2 -DUSE_CUDA=1 -I$(CUDA_DIR)/include $(SRC) -o deti_coins_intel_cuda -L$(CUDA_DIR)/lib64 -lcuda
+	cc -Wall -O2 -mavx2 -DUSE_CUDA=1 -I$(CUDA_DIR)/include $(SRC) -o deti_coins_intel_cuda -L$(CUDA_LD_DIR) -lcuda
 
 md5_cuda_kernel.cubin:			md5.h md5_cuda_kernel.cu
 	nvcc -arch=$(CUDA_ARCH) --compiler-options -O2,-Wall -I$(CUDA_DIR)/include --cubin md5_cuda_kernel.cu -o md5_cuda_kernel.cubin
