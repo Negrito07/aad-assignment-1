@@ -1,10 +1,10 @@
-#ifndef DETI_COINS_OPENMP_SEARCH
-#define DETI_COINS_OPENMP_SEARCH
+#ifndef DETI_COINS_OPENMP_AVX2_SEARCH
+#define DETI_COINS_OPENMP_AVX2_SEARCH
 
 #include <omp.h> // Biblioteca para OpenMP
 #include "md5_cpu_avx2.h"
 
-static void deti_coins_openmp_search(u32_t n_random_words)
+static void deti_coins_openmp_avx2_search(u32_t n_random_words)
 {
     u64_t n_attempts = 0, n_coins = 0;
 
@@ -32,7 +32,7 @@ static void deti_coins_openmp_search(u32_t n_random_words)
             bytes[lane] = (u08_t *)&coin[lane][0];
             bytes[lane][0] = 'D'; bytes[lane][1] = 'E'; bytes[lane][2] = 'T'; bytes[lane][3] = 'I';
             bytes[lane][4] = ' '; bytes[lane][5] = 'c'; bytes[lane][6] = 'o'; bytes[lane][7] = 'i';
-            bytes[lane][8] = 'n'; bytes[lane][9] = ' '; bytes[lane][10] = ' '; bytes[lane][11] = ' ';
+            bytes[lane][8] = 'n'; bytes[lane][9] = ' '; bytes[lane][10] = '0' + lane; bytes[lane][11] = '0' + omp_get_thread_num();
 
             for (int word_idx = 0; word_idx < 9; word_idx++) {
                 int idx = 12 + word_idx * 4; // Calcula o índice inicial do byte correspondente
@@ -49,10 +49,7 @@ static void deti_coins_openmp_search(u32_t n_random_words)
                 }
             }
 
-            bytes[lane][48] = ' ';  
-            bytes[lane][49] = ' ';  
-            bytes[lane][50] = ' ';  
-            bytes[lane][51] = '\n';
+            bytes[lane][48] = ' '; bytes[lane][49] = ' '; bytes[lane][50] = ' '; bytes[lane][51] = '\n';
         }
 
         // Loop de tentativa
@@ -85,7 +82,7 @@ static void deti_coins_openmp_search(u32_t n_random_words)
                 }
 
                 //Incrementa os bytes para próxima tentativa
-                for (idx = 10u; idx < 51u && bytes[lane][idx] == (u08_t)126; idx++)
+                for (idx = 12u; idx < 51u && bytes[lane][idx] == (u08_t)126; idx++)
                     bytes[lane][idx] = ' ';
                 if (idx < 52u - 1u)
                     bytes[lane][idx]++;
@@ -96,7 +93,7 @@ static void deti_coins_openmp_search(u32_t n_random_words)
     }
 
     STORE_DETI_COINS();
-    printf("deti_coins_openmp_search: %lu DETI coin%s found in %lu attempt%s (expected %.2f coins)\n",
+    printf("deti_coins_openmp_avx2_search: %lu DETI coin%s found in %lu attempt%s (expected %.2f coins)\n",
     n_coins, (n_coins == 1ul) ? "" : "s", n_attempts, (n_attempts == 1ul) ? "" : "s",
     (double)n_attempts / (double)(1ul << 32));
 }

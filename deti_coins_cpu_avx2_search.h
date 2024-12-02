@@ -29,7 +29,7 @@
             bytes[lane] = (u08_t *)&coin[lane][0];
             bytes[lane][0] = 'D'; bytes[lane][1] = 'E'; bytes[lane][2] = 'T'; bytes[lane][3] = 'I';
             bytes[lane][4] = ' '; bytes[lane][5] = 'c'; bytes[lane][6] = 'o'; bytes[lane][7] = 'i';
-            bytes[lane][8] = 'n'; bytes[lane][9] = ' '; bytes[lane][10] = ' '; bytes[lane][11] = ' ';
+            bytes[lane][8] = 'n'; bytes[lane][9] = ' '; bytes[lane][10] = 'L'; bytes[lane][11] = '0' + lane;
 
             for (int word_idx = 0; word_idx < 9; word_idx++) {
                 int idx = 12 + word_idx * 4; // Calcula o índice inicial do byte correspondente
@@ -46,10 +46,7 @@
                 }
             }
 
-            bytes[lane][48] = ' ';  
-            bytes[lane][49] = ' ';  
-            bytes[lane][50] = ' ';  
-            bytes[lane][51] = '\n';
+            bytes[lane][48] = ' '; bytes[lane][49] = ' '; bytes[lane][50] = ' '; bytes[lane][51] = '\n';
         }
 
         for (n_attempts = n_coins = 0ul; stop_request == 0; n_attempts += 8) {
@@ -78,7 +75,7 @@
                 }
 
                 //Incrementa os bytes para próxima tentativa
-                for (idx = 10u; idx < 51u && bytes[lane][idx] == (u08_t)126; idx++)
+                for (idx = 12u; idx < 51u && bytes[lane][idx] == (u08_t)126; idx++)
                     bytes[lane][idx] = ' ';
                 if (idx < 52u - 1u)
                     bytes[lane][idx]++;

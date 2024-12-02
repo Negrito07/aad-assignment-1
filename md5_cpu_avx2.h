@@ -10,6 +10,8 @@
 #ifndef MD5_CPU_AVX2
 #define MD5_CPU_AVX2
 
+#include <omp.h>
+
 //
 // CPU-only implementation using AVX2 instructions (assumes a little-endian CPU)
 //
@@ -100,6 +102,10 @@ static void test_md5_cpu_avx2(void)
 # endif
 # undef N_TIMING_TESTS
 }
+
+
+
+
 
 #endif
 #endif
