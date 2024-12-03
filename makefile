@@ -34,6 +34,7 @@ SRC       = deti_coins.c
 H_FILES   = cpu_utilities.h
 H_FILES  += md5.h md5_test_data.h md5_cpu.h md5_cpu_avx.h md5_cpu_neon.h md5_cpu_avx2.h
 H_FILES  += deti_coins_vault.h deti_coins_cpu_search.h deti_coins_cpu_avx_search.h deti_coins_cpu_avx2_search.h deti_coins_openmp_search.h
+H_FILES  += deti_coins_cuda_search.h
 C_FILES   = cuda_driver_api_utilities.h md5_cuda.h
 
 
@@ -64,7 +65,7 @@ deti_coins_apple:	$(SRC) $(H_FILES)
 #
 # compile for Intel/AMD processors with CUDA
 #
-deti_coins_intel_cuda:	$(SRC) $(H_FILES) $(C_FILES) md5_cuda_kernel.cubin
+deti_coins_intel_cuda:	$(SRC) $(H_FILES) $(C_FILES) md5_cuda_kernel.cubin deti_coins_cuda_kernel_search.cubin
 	cc -Wall -O2 -mavx2 -DUSE_CUDA=1 -I$(CUDA_DIR)/include $(SRC) -o deti_coins_intel_cuda -L$(CUDA_LD_DIR) -lcuda
 
 md5_cuda_kernel.cubin:			md5.h md5_cuda_kernel.cu
